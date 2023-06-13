@@ -37,21 +37,21 @@ This repo is kind of a template I use when starting up new FastAPI projects:
 ### Linters
 Format the code
 ```shell
-docker compose exec app format
+docker-compose exec app format
 ```
 
 ### Migrations
 - Create an automatic migration from changes in `src/database.py`
 ```shell
-docker compose exec app makemigrations *migration_name*
+docker-compose exec app makemigrations *migration_name*
 ```
 - Run migrations
 ```shell
-docker compose exec app migrate
+docker-compose exec app migrate
 ```
 - Downgrade migrations
 ```shell
-docker compose exec app downgrade -1  # or -2 or base or hash of the migration
+docker-compose exec app downgrade -1  # or -2 or base or hash of the migration
 ```
 ### Tests
 All tests are integrational and require DB connection. 
@@ -62,5 +62,5 @@ One of the choices I've made is to use default database (`postgres`), separated 
 
 Run tests
 ```shell
-docker compose exec app pytest
+docker-compose exec app pytest
 ```

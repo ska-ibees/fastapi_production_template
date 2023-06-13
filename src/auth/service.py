@@ -25,19 +25,24 @@ async def create_user(user: AuthUser) -> Record | None:
         )
         .returning(auth_user)
     )
-
     return await database.fetch_one(insert_query)
+
+
+async def delete_user(email: str) -> None:
+    delete_query = auth_user.delete().where(auth_user.c.email == email)
+    user = await get_user_by_email(email)
+    if not user:
+        raise InvalidCredentials()
+    return await database.execute(delete_query)
 
 
 async def get_user_by_id(user_id: int) -> Record | None:
     select_query = select(auth_user).where(auth_user.c.id == user_id)
-
     return await database.fetch_one(select_query)
 
 
 async def get_user_by_email(email: str) -> Record | None:
     select_query = select(auth_user).where(auth_user.c.email == email)
-
     return await database.fetch_one(select_query)
 
 
@@ -46,7 +51,6 @@ async def create_refresh_token(
 ) -> str:
     if not refresh_token:
         refresh_token = utils.generate_random_alphanum(64)
-
     insert_query = refresh_tokens.insert().values(
         uuid=uuid.uuid4(),
         refresh_token=refresh_token,
@@ -54,7 +58,6 @@ async def create_refresh_token(
         user_id=user_id,
     )
     await database.execute(insert_query)
-
     return refresh_token
 
 
@@ -72,7 +75,6 @@ async def expire_refresh_token(refresh_token_uuid: UUID4) -> None:
         .values(expires_at=datetime.utcnow() - timedelta(days=1))
         .where(refresh_tokens.c.uuid == refresh_token_uuid)
     )
-
     await database.execute(update_query)
 
 

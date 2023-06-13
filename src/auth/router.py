@@ -1,5 +1,6 @@
 from databases.interfaces import Record
 from fastapi import APIRouter, BackgroundTasks, Depends, Response, status
+from fastapi.security import OAuth2PasswordRequestForm
 
 from src.auth import jwt, service, utils
 from src.auth.dependencies import (
@@ -23,6 +24,12 @@ async def register_user(
     }
 
 
+@router.delete("/delete/user/{email}")
+async def delete_user(email: str):
+    await service.delete_user(email)
+    return {"detail": f"User with '{email}' deleted successfully"}
+
+
 @router.get("/users/me", response_model=UserResponse)
 async def get_my_account(
     jwt_data: JWTData = Depends(parse_jwt_user_data),
@@ -35,7 +42,10 @@ async def get_my_account(
 
 
 @router.post("/users/tokens", response_model=AccessTokenResponse)
-async def auth_user(auth_data: AuthUser, response: Response) -> AccessTokenResponse:
+async def auth_user(
+    response: Response, form_data: OAuth2PasswordRequestForm = Depends()
+):
+    auth_data = AuthUser(email=form_data.username, password=form_data.password)
     user = await service.authenticate_user(auth_data)
     refresh_token_value = await service.create_refresh_token(user_id=user["id"])
 
